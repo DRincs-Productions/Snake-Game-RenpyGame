@@ -4,6 +4,8 @@ import pythonpackages.renpygame as pygame
 
 import renpy.exports as renpy
 
+from pythonpackages.renpygame.event import EventType
+
 width = 500
 height = 500
 
@@ -56,28 +58,22 @@ class snake:
         self.dirny = 1
 
     def move(self):
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                pygame.quit()
-            keys = pygame.key.get_pressed()
-
-            for key in keys:
-                if keys[pygame.K_LEFT]:
-                    self.dirnx = -1
-                    self.dirny = 0
-                    self.turns[self.head.pos[:]] = [self.dirnx, self.dirny]
-                elif keys[pygame.K_RIGHT]:
-                    self.dirnx = 1
-                    self.dirny = 0
-                    self.turns[self.head.pos[:]] = [self.dirnx, self.dirny]
-                elif keys[pygame.K_UP]:
-                    self.dirny = -1
-                    self.dirnx = 0
-                    self.turns[self.head.pos[:]] = [self.dirnx, self.dirny]
-                elif keys[pygame.K_DOWN]:
-                    self.dirny = 1
-                    self.dirnx = 0
-                    self.turns[self.head.pos[:]] = [self.dirnx, self.dirny]
+        if sh.move == 1:  # left
+            self.dirnx = -1
+            self.dirny = 0
+            self.turns[self.head.pos[:]] = [self.dirnx, self.dirny]
+        elif sh.move == 0:  # right
+            self.dirnx = 1
+            self.dirny = 0
+            self.turns[self.head.pos[:]] = [self.dirnx, self.dirny]
+        elif sh.move == 2:  # up
+            self.dirny = -1
+            self.dirnx = 0
+            self.turns[self.head.pos[:]] = [self.dirnx, self.dirny]
+        elif sh.move == 3:  # down
+            self.dirny = 1
+            self.dirnx = 0
+            self.turns[self.head.pos[:]] = [self.dirnx, self.dirny]
 
         for i, c in enumerate(self.body):
             p = c.pos[:]
@@ -163,6 +159,7 @@ class SnakeSharedData:
         self.snake_player.addCube()
         self.snack = cube(randomSnack(rows, self.snake_player), color=(0, 255, 0))
         self.flag = True
+        self.move = 0  # 0 right, 1 left, 2 up, 3 down
 
 
 sh = SnakeSharedData()
@@ -177,7 +174,7 @@ def main():
 
     minigame = pygame.RenpyGameByTimerForDraw(
         update_process=snake_logic,
-        # event_lambda=game_event,
+        event_lambda=game_event,
         delay=0.7,
     )
     minigame.show(show_and_start=True)
@@ -217,3 +214,15 @@ def snake_logic(
         return next_frame_time
     else:
         return None
+
+
+def game_event(ev: EventType, x: int, y: int, st: float):
+    if ev.type == pygame.KEYDOWN and ev.key == pygame.K_RIGHT:
+        sh.move = 0
+    elif ev.type == pygame.KEYDOWN and ev.key == pygame.K_LEFT:
+        sh.move = 1
+    elif ev.type == pygame.KEYDOWN and ev.key == pygame.K_UP:
+        sh.move = 2
+    elif ev.type == pygame.KEYDOWN and ev.key == pygame.K_DOWN:
+        sh.move = 3
+    return
