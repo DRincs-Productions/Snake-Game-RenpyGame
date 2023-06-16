@@ -117,13 +117,22 @@ class snake:
                 c.draw(surface)
 
 
-def redrawWindow(screen: pygame.Surface):
-    screen.fill((0, 0, 0))
-    drawGrid(width, rows, screen)
-    sh.snake_player.draw(screen)
-    sh.snack.draw(screen)
-    pygame.display.update()
-    pass
+def redrawWindow(margin: int, screen: pygame.Surface, st: float, at: float):
+    # create the background, tile the bgd image
+    rectangle = pygame.image.load("rectangle.webp").convert(st, at)
+    x_rectangle, y_rectangle = rectangle.get_size()
+    sh.background = pygame.Surface(SCREENRECT.size)
+    x_background, y_background = SCREENRECT.size
+    max_x = x_background // (x_rectangle + margin)
+    max_y = y_background // (y_rectangle + margin)
+    for x in range(max_x):
+        for y in range(max_y):
+            screen.blit(
+                rectangle, (x * (x_rectangle + margin), y * (y_rectangle + margin))
+            )
+
+    screen.blit(sh.background, (0, 0))
+    pygame.display.flip()
 
 
 def drawGrid(w, rows, surface):
