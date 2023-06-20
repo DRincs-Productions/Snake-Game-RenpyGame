@@ -3,29 +3,36 @@ from typing import Optional
 import pythonpackages.renpygame as pygame
 
 import renpy.exports as renpy
+from pythonpackages.renpygame.display import Surface
 
 from pythonpackages.renpygame.event import EventType
 
 
 class Snake(pygame.sprite.Sprite):
-    image = ""
-
-    def __init__(self, pos):
+    def __init__(
+        self,
+        image: Surface,
+        pos: tuple[int, int],
+        containers: list[pygame.sprite.AbstractGroup],
+    ):
         # TODO: pos * size of the rectangle
-        pygame.sprite.Sprite.__init__(self, self.containers)
-        self.rect = self.image.get_rect(midbottom=pos)
+        pygame.sprite.Sprite.__init__(self, containers)
+        self.rect = image.get_rect(midbottom=pos)
 
     def update(self):
         self.rect.move_ip(0, 1)  # TODO: to change
 
 
 class Snak(pygame.sprite.Sprite):
-    image = ""
-
-    def __init__(self, pos):
+    def __init__(
+        self,
+        image: Surface,
+        pos: tuple[int, int],
+        containers: list[pygame.sprite.AbstractGroup],
+    ):
         # TODO: pos * size of the rectangle
-        pygame.sprite.Sprite.__init__(self, self.containers)
-        self.rect = self.image.get_rect(midbottom=pos)
+        pygame.sprite.Sprite.__init__(self, containers)
+        self.rect = image.get_rect(midbottom=pos)
 
     def update(self):
         return
@@ -42,6 +49,15 @@ class SnakeSharedData:
         self.snake_render = pygame.sprite.Group()
         self.snack_render = pygame.sprite.GroupSingle()
         self.all = pygame.sprite.RenderUpdates()
+        self._background = None
+
+    @property
+    def background(self) -> pygame.Surface:
+        return self._background
+
+    @background.setter
+    def background(self, value: pygame.Surface):
+        self._background = value
 
 
 sh = SnakeSharedData()
