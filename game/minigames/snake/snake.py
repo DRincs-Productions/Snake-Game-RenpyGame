@@ -117,7 +117,9 @@ class snake:
                 c.draw(surface)
 
 
-def redrawWindow(margin: int, screen: pygame.Surface, st: float, at: float):
+def redrawWindow(
+    margin: int, screen: pygame.Surface, st: float, at: float
+) -> tuple[int, int]:
     # create the background, tile the bgd image
     rectangle = pygame.image.load("rectangle.webp").convert(st, at)
     x_rectangle, y_rectangle = rectangle.get_size()
@@ -133,6 +135,7 @@ def redrawWindow(margin: int, screen: pygame.Surface, st: float, at: float):
 
     screen.blit(sh.background, (0, 0))
     pygame.display.flip()
+    return max_x, max_y
 
 
 def drawGrid(w, rows, surface):
@@ -162,13 +165,41 @@ def randomSnack(rows, item):
     return (x, y)
 
 
+class Snake(pygame.sprite.Sprite):
+    image = ""
+
+    def __init__(self, pos):
+        # TODO: pos * size of the rectangle
+        pygame.sprite.Sprite.__init__(self, self.containers)
+        self.rect = self.image.get_rect(midbottom=pos)
+
+    def update(self):
+        self.rect.move_ip(0, 1)  # TODO: to change
+
+
+class Snak(pygame.sprite.Sprite):
+    image = ""
+
+    def __init__(self, pos):
+        # TODO: pos * size of the rectangle
+        pygame.sprite.Sprite.__init__(self, self.containers)
+        self.rect = self.image.get_rect(midbottom=pos)
+
+    def update(self):
+        return
+
+
 class SnakeSharedData:
     def __init__(self):
-        self.snake_player = snake((255, 0, 0), (10, 10))
-        self.snake_player.addCube()
-        self.snack = cube(randomSnack(rows, self.snake_player), color=(0, 255, 0))
         self.flag = True
         self.move = 0  # 0 right, 1 left, 2 up, 3 down
+        self.snake_head_position = (0, 0)
+        self.snake_tail_position = self.snake_head_position
+        self.max_position = (0, 0)
+        self.snack_position = (0, 0)
+        self.snake_render = pygame.sprite.Group()
+        self.snack_render = pygame.sprite.GroupSingle()
+        self.all = pygame.sprite.RenderUpdates()
 
 
 sh = SnakeSharedData()
@@ -181,16 +212,48 @@ def main():
     if not sh:
         sh = SnakeSharedData()
 
-    minigame = pygame.RenpyGameByTimerForDraw(
+    minigame = pygame.RenpyGameByLoop(
+        first_step=snake_first_step,
         update_process=snake_logic,
         event_lambda=game_event,
-        delay=0.7,
+        delay=0.04,
     )
     minigame.show(show_and_start=True)
 
 
+def set_new_snack_position():
+    """Set a new snack position"""
+    snack_x = random.randrange(0, sh.max_position[0])
+    snack_y = random.randrange(0, sh.max_position[1])
+    sh.snack_position = (snack_x, snack_y)
+
+
 def snake_first_step(width: int, height: int, st: float, at: float) -> pygame.Surface:
-    screen = pygame.display.set_mode((width, height))
+    # Set the display mode
+    if store._preferences.fullscreen:
+        winstyle = FULLSCREEN
+    else:
+        winstyle = 0
+
+    bestdepth = pygame.display.mode_ok((0, 0), winstyle, 32)
+    screen = pygame.display.set_mode((0, 0), winstyle, bestdepth)
+
+    sh.max_position = redrawWindow(1, screen, st, at)
+
+    # random starting positions, max is sh.max_position
+    start_x = random.randrange(0, sh.max_position[0])
+    start_y = random.randrange(0, sh.max_position[1])
+    sh.snake_head_position = (start_x, start_y)
+    sh.snake_tail_position = sh.snake_head_position
+
+    set_new_snack_position()
+
+    Snake.containers = sh.snake_render, sh.all
+    Snak.containers = sh.snack_render, sh.all
+
+    sh.snake = [Snake(sh.snake_head_position)]
+    sh.snack = Snak(sh.snack_position)
+
     return screen
 
 
@@ -201,37 +264,70 @@ def snake_logic(
     current_frame_number: int,
 ) -> Optional[float]:
     if sh.flag:
-        sh.snake_player.move()
-        headPos = sh.snake_player.head.pos
-        if headPos[0] >= 20 or headPos[0] < 0 or headPos[1] >= 20 or headPos[1] < 0:
-            print("Score:", len(sh.snake_player.body))
-            sh.snake_player.reset((10, 10))
+        # clear/erase the last drawn sprites
+        sh.all.clear(cur_screen, sh.background)
 
-        if sh.snake_player.body[0].pos == sh.snack.pos:
-            sh.snake_player.addCube()
-            sh.snack = cube(randomSnack(rows, sh.snake_player), color=(0, 255, 0))
+        # update all the sprites
+        sh.all.update()
 
-        for x in range(len(sh.snake_player.body)):
-            if sh.snake_player.body[x].pos in list(
-                map(lambda z: z.pos, sh.snake_player.body[x + 1 :])
-            ):
-                print("Score:", len(sh.snake_player.body))
-                sh.snake_player.reset((10, 10))
+        new_head_position = (0, 0)
+        # determines the new position of the head
+        if sh.move == 0:  # right
+            new_head_position = (
+                sh.snake_head_position[0] + 1,
+                sh.snake_head_position[1],
+            )
+        elif sh.move == 1:  # left
+            new_head_position = (
+                sh.snake_head_position[0] - 1,
+                sh.snake_head_position[1],
+            )
+        elif sh.move == 2:  # up
+            new_head_position = (
+                sh.snake_head_position[0],
+                sh.snake_head_position[1] - 1,
+            )
+        elif sh.move == 3:  # down
+            new_head_position = (
+                sh.snake_head_position[0],
+                sh.snake_head_position[1] + 1,
+            )
+
+        # check if the new position is equal a position of the snake
+        for snake in sh.snake:
+            if snake.rect.midbottom == new_head_position:
+                sh.flag = False
                 break
 
-        redrawWindow(cur_screen)
-        return next_frame_time
+        # check if the new position is equal to the snack position
+        if new_head_position == sh.snack_position:
+            sh.snake.append(Snake(sh.snake_head_position))
+            set_new_snack_position()
+            sh.snack.kill()
+            sh.snack = Snak(sh.snack_position)
+        else:
+            sh.snake.append(Snake(sh.snake_head_position))
+            # remove the tail
+            sh.snake[0].kill()
     else:
         return None
 
 
 def game_event(ev: EventType, x: int, y: int, st: float):
     if ev.type == pygame.KEYDOWN and ev.key == pygame.K_RIGHT:
+        if sh.move == 1:
+            return
         sh.move = 0
     elif ev.type == pygame.KEYDOWN and ev.key == pygame.K_LEFT:
+        if sh.move == 0:
+            return
         sh.move = 1
     elif ev.type == pygame.KEYDOWN and ev.key == pygame.K_UP:
+        if sh.move == 3:
+            return
         sh.move = 2
     elif ev.type == pygame.KEYDOWN and ev.key == pygame.K_DOWN:
+        if sh.move == 2:
+            return
         sh.move = 3
     return
