@@ -1,5 +1,5 @@
 import random
-from typing import Optional
+from typing import Optional, Union
 import pythonpackages.renpygame as pygame
 
 import renpy.exports as renpy
@@ -20,10 +20,12 @@ class Snake(pygame.sprite.Sprite):
         self,
         pos: tuple[int, int],
         containers: list[
-            pygame.sprite.AbstractGroup
-            | pygame.sprite.Group
-            | pygame.sprite.RenderUpdates
-            | pygame.sprite.GroupSingle
+            Union[
+                pygame.sprite.AbstractGroup,
+                pygame.sprite.Group,
+                pygame.sprite.RenderUpdates,
+                pygame.sprite.GroupSingle,
+            ]
         ],
     ):
         # TODO: pos * size of the rectangle
@@ -41,10 +43,12 @@ class Snak(pygame.sprite.Sprite):
         self,
         pos: tuple[int, int],
         containers: list[
-            pygame.sprite.AbstractGroup
-            | pygame.sprite.Group
-            | pygame.sprite.RenderUpdates
-            | pygame.sprite.GroupSingle
+            Union[
+                pygame.sprite.AbstractGroup,
+                pygame.sprite.Group,
+                pygame.sprite.RenderUpdates,
+                pygame.sprite.GroupSingle,
+            ]
         ],
     ):
         # TODO: pos * size of the rectangle
