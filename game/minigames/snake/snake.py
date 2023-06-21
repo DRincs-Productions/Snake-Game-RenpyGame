@@ -31,7 +31,7 @@ class Snake(pygame.sprite.Sprite):
     ):
         # TODO: pos * size of the rectangle
         pygame.sprite.Sprite.__init__(self, containers)
-        self.rect = self.image.get_rect(midbottom=pos)
+        self.rect = self.image.get_rect()
         self.life = life
         print(pos[0] * self.rect.width)
         print(pos[1] * self.rect.height)
@@ -41,8 +41,8 @@ class Snake(pygame.sprite.Sprite):
     def update(self):
         self.rect.move_ip(0, 1)  # TODO: to change
         self.life -= 1
-        # if self.life <= 0:
-        #     self.kill()
+        if self.life <= 0:
+            self.kill()
 
 
 class Snak(pygame.sprite.Sprite):
