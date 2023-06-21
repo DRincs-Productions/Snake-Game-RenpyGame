@@ -6,33 +6,50 @@ import renpy.exports as renpy
 from pythonpackages.renpygame.display import Surface
 
 from pythonpackages.renpygame.event import EventType
+from pythonpackages.renpygame.rect import Rect
+import renpy.exports as renpy
+import renpy.store as store
+
+SCREENRECT = Rect(0, 0, 640, 480)
 
 
 class Snake(pygame.sprite.Sprite):
+    image: Surface
+
     def __init__(
         self,
-        image: Surface,
         pos: tuple[int, int],
-        containers: list[pygame.sprite.AbstractGroup],
+        containers: list[
+            pygame.sprite.AbstractGroup
+            | pygame.sprite.Group
+            | pygame.sprite.RenderUpdates
+            | pygame.sprite.GroupSingle
+        ],
     ):
         # TODO: pos * size of the rectangle
         pygame.sprite.Sprite.__init__(self, containers)
-        self.rect = image.get_rect(midbottom=pos)
+        self.rect = self.image.get_rect(midbottom=pos)
 
     def update(self):
         self.rect.move_ip(0, 1)  # TODO: to change
 
 
 class Snak(pygame.sprite.Sprite):
+    image: Surface
+
     def __init__(
         self,
-        image: Surface,
         pos: tuple[int, int],
-        containers: list[pygame.sprite.AbstractGroup],
+        containers: list[
+            pygame.sprite.AbstractGroup
+            | pygame.sprite.Group
+            | pygame.sprite.RenderUpdates
+            | pygame.sprite.GroupSingle
+        ],
     ):
         # TODO: pos * size of the rectangle
         pygame.sprite.Sprite.__init__(self, containers)
-        self.rect = image.get_rect(midbottom=pos)
+        self.rect = self.image.get_rect(midbottom=pos)
 
     def update(self):
         return
@@ -43,13 +60,12 @@ class SnakeSharedData:
         self.flag = True
         self.move = 0  # 0 right, 1 left, 2 up, 3 down
         self.snake_head_position: tuple[int, int] = 0, 0
-        self.snake_tail_position = self.snake_head_position
+        self.snake_tail_position: tuple[int, int] = self.snake_head_position
         self.max_position: tuple[int, int] = 0, 0
         self.snack_position: tuple[int, int] = 0, 0
         self.snake_render = pygame.sprite.Group()
         self.snack_render = pygame.sprite.GroupSingle()
         self.all = pygame.sprite.RenderUpdates()
-        self._background = None
 
     @property
     def background(self) -> pygame.Surface:
@@ -58,6 +74,22 @@ class SnakeSharedData:
     @background.setter
     def background(self, value: pygame.Surface):
         self._background = value
+
+    @property
+    def snake(self) -> list[Snake]:
+        return self._snake
+
+    @snake.setter
+    def snake(self, value: list[Snake]):
+        self._snake = value
+
+    @property
+    def snack(self) -> Snak:
+        return self._snack
+
+    @snack.setter
+    def snack(self, value: Snak):
+        self._snack = value
 
 
 sh = SnakeSharedData()
@@ -127,11 +159,11 @@ def snake_first_step(width: int, height: int, st: float, at: float) -> pygame.Su
 
     set_new_snack_position()
 
-    Snake.containers = sh.snake_render, sh.all
-    Snak.containers = sh.snack_render, sh.all
+    Snake.image = pygame.image.load("snake.webp").convert(st, at)
+    Snak.image = pygame.image.load("snak.webp").convert(st, at)
 
-    sh.snake = [Snake(sh.snake_head_position)]
-    sh.snack = Snak(sh.snack_position)
+    sh.snake = [Snake(sh.snake_head_position, [sh.snake_render, sh.all])]
+    sh.snack = Snak(sh.snack_position, [sh.snack_render, sh.all])
 
     return screen
 
@@ -180,12 +212,12 @@ def snake_logic(
 
         # check if the new position is equal to the snack position
         if new_head_position == sh.snack_position:
-            sh.snake.append(Snake(sh.snake_head_position))
+            sh.snake.append(Snake(sh.snake_head_position, [sh.snake_render, sh.all]))
             set_new_snack_position()
             sh.snack.kill()
-            sh.snack = Snak(sh.snack_position)
+            sh.snack = Snak(sh.snack_position, [sh.snack_render, sh.all])
         else:
-            sh.snake.append(Snake(sh.snake_head_position))
+            sh.snake.append(Snake(sh.snake_head_position, [sh.snake_render, sh.all]))
             # remove the tail
             sh.snake[0].kill()
     else:
