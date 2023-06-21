@@ -123,8 +123,8 @@ def redrawWindow(
     x_rectangle, y_rectangle = rectangle.get_size()
     sh.background = pygame.Surface(SCREENRECT.size)
     x_background, y_background = SCREENRECT.size
-    max_x = x_background // (x_rectangle + margin)
-    max_y = y_background // (y_rectangle + margin)
+    max_x = int(x_background // (x_rectangle + margin))
+    max_y = int(y_background // (y_rectangle + margin))
     for x in range(max_x):
         for y in range(max_y):
             screen.blit(
@@ -153,7 +153,7 @@ def snake_first_step(width: int, height: int, st: float, at: float) -> pygame.Su
     bestdepth = pygame.display.mode_ok((0, 0), winstyle, 32)
     screen = pygame.display.set_mode((0, 0), winstyle, bestdepth)
 
-    sh.max_position = redrawWindow(1, screen, st, at)
+    sh.max_position = redrawWindow(3, screen, st, at)
 
     # random starting positions, max is sh.max_position
     start_x = random.randrange(0, sh.max_position[0])
