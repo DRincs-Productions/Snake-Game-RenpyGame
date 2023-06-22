@@ -29,17 +29,14 @@ class Snake(pygame.sprite.Sprite):
         ],
         life: int = 1,
     ):
-        # TODO: pos * size of the rectangle
         pygame.sprite.Sprite.__init__(self, containers)
         self.rect = self.image.get_rect()
         self.life = life
-        print(pos[0] * self.rect.width)
-        print(pos[1] * self.rect.height)
-        self.rect.right = pos[0] * self.rect.width
-        self.rect.left = pos[1] * self.rect.height
+        self.rect.left = (pos[0] * sh.x_rectangle) + (sh.margin * pos[0])
+        self.rect.top = (pos[1] * sh.y_rectangle) + (sh.margin * pos[0])
+        print(self.rect.left, self.rect.top)
 
     def update(self):
-        self.rect.move_ip(0, 1)  # TODO: to change
         self.life -= 1
         if self.life <= 0:
             self.kill()
@@ -72,6 +69,7 @@ class SnakeSharedData:
     def __init__(self):
         self.flag = True
         self.move = 0  # 0 right, 1 left, 2 up, 3 down
+        self.before_move = self.move
         self.snake_head_position: tuple[int, int] = 0, 0
         self.max_position: tuple[int, int] = 0, 0
         self.snack_position: tuple[int, int] = 0, 0
@@ -79,6 +77,9 @@ class SnakeSharedData:
         self.snack_render = pygame.sprite.GroupSingle()
         self.all = pygame.sprite.RenderUpdates()
         self.point = 1
+        self.margin = 3
+        self.x_rectangle = 0
+        self.y_rectangle = 0
 
     @property
     def background(self) -> pygame.Surface:
@@ -121,7 +122,7 @@ def redrawWindow(
 ) -> tuple[int, int]:
     # create the background, tile the bgd image
     rectangle = pygame.image.load("rectangle.webp").convert(st, at)
-    x_rectangle, y_rectangle = rectangle.get_size()
+    sh.x_rectangle, sh.y_rectangle = rectangle.get_size()
     sh.background = pygame.Surface(SCREENRECT.size)
     x_background, y_background = SCREENRECT.size
     max_x = int(x_background // (x_rectangle + margin))
@@ -142,6 +143,7 @@ def set_new_snack_position():
     """Set a new snack position"""
     snack_x = random.randrange(0, sh.max_position[0])
     snack_y = random.randrange(0, sh.max_position[1])
+    print(snack_x, snack_y)
     sh.snack_position = (snack_x, snack_y)
 
 
@@ -155,7 +157,7 @@ def snake_first_step(width: int, height: int, st: float, at: float) -> pygame.Su
     bestdepth = pygame.display.mode_ok((0, 0), winstyle, 32)
     screen = pygame.display.set_mode((0, 0), winstyle, bestdepth)
 
-    sh.max_position = redrawWindow(3, screen, st, at)
+    sh.max_position = redrawWindow(sh.margin, screen, st, at)
 
     # random starting positions, max is sh.max_position
     start_x = random.randrange(0, sh.max_position[0])
@@ -168,7 +170,7 @@ def snake_first_step(width: int, height: int, st: float, at: float) -> pygame.Su
     Snak.image = pygame.image.load("snak.webp").convert(st, at)
 
     Snake(sh.snake_head_position, [sh.snake_render, sh.all])
-    sh.snack = Snak(sh.snack_position, [sh.snack_render, sh.all])
+    sh.snack = Snak((0, 0), [sh.snack_render, sh.all])
 
     return screen
 
@@ -186,24 +188,38 @@ def snake_logic(
         # update all the sprites
         sh.all.update()
 
-        new_head_position = (0, 0)
         # determines the new position of the head
+        new_head_position = (0, 0)
+
+        if sh.move == 0 and sh.before_move == 1:
+            sh.move = 1
+        elif sh.move == 1 and sh.before_move == 0:
+            sh.move = 0
+        elif sh.move == 2 and sh.before_move == 3:
+            sh.move = 3
+        elif sh.move == 3 and sh.before_move == 2:
+            sh.move = 2
+
         if sh.move == 0:  # right
+            sh.before_move = 0
             new_head_position = (
                 sh.snake_head_position[0] + 1,
                 sh.snake_head_position[1],
             )
         elif sh.move == 1:  # left
+            sh.before_move = 1
             new_head_position = (
                 sh.snake_head_position[0] - 1,
                 sh.snake_head_position[1],
             )
         elif sh.move == 2:  # up
+            sh.before_move = 2
             new_head_position = (
                 sh.snake_head_position[0],
                 sh.snake_head_position[1] - 1,
             )
         elif sh.move == 3:  # down
+            sh.before_move = 3
             new_head_position = (
                 sh.snake_head_position[0],
                 sh.snake_head_position[1] + 1,
@@ -225,9 +241,6 @@ def snake_logic(
         Snake(new_head_position, [sh.snake_render, sh.all], life=sh.point)
         sh.snake_head_position = new_head_position
 
-        print(sh.snake_render)
-        print("snake_head_position", sh.snake_head_position)
-
         # draw the scene
         dirty = sh.all.draw(cur_screen)
         pygame.display.update(dirty)
@@ -239,19 +252,11 @@ def snake_logic(
 
 def game_event(ev: EventType, x: int, y: int, st: float):
     if ev.type == pygame.KEYDOWN and ev.key == pygame.K_RIGHT:
-        if sh.move == 1:
-            return
         sh.move = 0
     elif ev.type == pygame.KEYDOWN and ev.key == pygame.K_LEFT:
-        if sh.move == 0:
-            return
         sh.move = 1
     elif ev.type == pygame.KEYDOWN and ev.key == pygame.K_UP:
-        if sh.move == 3:
-            return
         sh.move = 2
     elif ev.type == pygame.KEYDOWN and ev.key == pygame.K_DOWN:
-        if sh.move == 2:
-            return
         sh.move = 3
     return
