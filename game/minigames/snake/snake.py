@@ -34,7 +34,6 @@ class Snake(pygame.sprite.Sprite):
         self.life = life
         self.rect.left = pos[0] * (sh.x_rectangle + sh.margin)
         self.rect.top = pos[1] * (sh.x_rectangle + sh.margin)
-        print(self.rect.left, self.rect.top)
 
     def update(self):
         self.life -= 1
@@ -59,7 +58,9 @@ class Snak(pygame.sprite.Sprite):
     ):
         # TODO: pos * size of the rectangle
         pygame.sprite.Sprite.__init__(self, containers)
-        self.rect = self.image.get_rect(midbottom=pos)
+        self.rect = self.image.get_rect()
+        self.rect.left = pos[0] * (sh.x_rectangle + sh.margin)
+        self.rect.top = pos[1] * (sh.x_rectangle + sh.margin)
 
     def update(self):
         return
@@ -144,7 +145,6 @@ def set_new_snack_position():
     """Set a new snack position"""
     snack_x = random.randrange(0, sh.max_position[0])
     snack_y = random.randrange(0, sh.max_position[1])
-    print(snack_x, snack_y)
     sh.snack_position = (snack_x, snack_y)
 
 
@@ -227,12 +227,12 @@ def snake_logic(
             )
 
         if new_head_position[0] < 0:
-            new_head_position = (sh.max_position[0], new_head_position[1])
-        elif new_head_position[0] > sh.max_position[0]:
+            new_head_position = (sh.max_position[0] - 1, new_head_position[1])
+        elif new_head_position[0] > sh.max_position[0] - 1:
             new_head_position = (0, new_head_position[1])
         elif new_head_position[1] < 0:
-            new_head_position = (new_head_position[0], sh.max_position[1])
-        elif new_head_position[1] > sh.max_position[1]:
+            new_head_position = (new_head_position[0], sh.max_position[1] - 1)
+        elif new_head_position[1] > sh.max_position[1] - 1:
             new_head_position = (new_head_position[0], 0)
 
         # # check if the new position is equal a position of the snake
@@ -241,15 +241,15 @@ def snake_logic(
         #         sh.flag = False
         #         break
 
-        # check if the new position is equal to the snack position
-        # if new_head_position == sh.snack_position:
-        #     Snake(sh.snake_head_position, [sh.snake_render, sh.all])
-        #     set_new_snack_position()
-        #     sh.snack.kill()
-        #     sh.snack = Snak(sh.snack_position, [sh.snack_render, sh.all])
-        # else:
         Snake(new_head_position, [sh.snake_render, sh.all], life=sh.point)
         sh.snake_head_position = new_head_position
+
+        # check if the new position is equal to the snack position
+        if sh.snake_head_position == sh.snack_position:
+            sh.point += 1
+            set_new_snack_position()
+            sh.snack.kill()
+            sh.snack = Snak(sh.snack_position, [sh.snack_render, sh.all])
 
         # draw the scene
         dirty = sh.all.draw(cur_screen)
