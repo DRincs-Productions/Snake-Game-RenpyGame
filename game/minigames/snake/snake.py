@@ -32,8 +32,8 @@ class Snake(pygame.sprite.Sprite):
         pygame.sprite.Sprite.__init__(self, containers)
         self.rect = self.image.get_rect()
         self.life = life
-        self.rect.left = (pos[0] * sh.x_rectangle) + (sh.margin * pos[0])
-        self.rect.top = (pos[1] * sh.y_rectangle) + (sh.margin * pos[0])
+        self.rect.left = pos[0] * (sh.x_rectangle + sh.margin)
+        self.rect.top = pos[1] * (sh.x_rectangle + sh.margin)
         print(self.rect.left, self.rect.top)
 
     def update(self):
@@ -125,12 +125,13 @@ def redrawWindow(
     sh.x_rectangle, sh.y_rectangle = rectangle.get_size()
     sh.background = pygame.Surface(SCREENRECT.size)
     x_background, y_background = SCREENRECT.size
-    max_x = int(x_background // (x_rectangle + margin))
-    max_y = int(y_background // (y_rectangle + margin))
+    max_x = int(x_background // (sh.x_rectangle + margin))
+    max_y = int(y_background // (sh.y_rectangle + margin))
     for x in range(max_x):
         for y in range(max_y):
             sh.background.blit(
-                rectangle, (x * (x_rectangle + margin), y * (y_rectangle + margin))
+                rectangle,
+                (x * (sh.x_rectangle + margin), y * (sh.y_rectangle + margin)),
             )
     sh.max_position = max_x, max_y
 
@@ -224,6 +225,15 @@ def snake_logic(
                 sh.snake_head_position[0],
                 sh.snake_head_position[1] + 1,
             )
+
+        if new_head_position[0] < 0:
+            new_head_position = (sh.max_position[0], new_head_position[1])
+        elif new_head_position[0] > sh.max_position[0]:
+            new_head_position = (0, new_head_position[1])
+        elif new_head_position[1] < 0:
+            new_head_position = (new_head_position[0], sh.max_position[1])
+        elif new_head_position[1] > sh.max_position[1]:
+            new_head_position = (new_head_position[0], 0)
 
         # # check if the new position is equal a position of the snake
         # for snake in sh.snake:
