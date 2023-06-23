@@ -184,26 +184,30 @@ def snake_logic(
         # determines the new position of the head
         new_head_position = (0, 0)
 
-        if (
-            sh.current_direction == Direction.RIGHT
-            and sh.before_direction == Direction.LEFT
-        ):
-            sh.current_direction = Direction.LEFT
-        elif (
-            sh.current_direction == Direction.LEFT
-            and sh.before_direction == Direction.RIGHT
-        ):
-            sh.current_direction = Direction.RIGHT
-        elif (
-            sh.current_direction == Direction.UP
-            and sh.before_direction == Direction.DOWN
-        ):
-            sh.current_direction = Direction.DOWN
-        elif (
-            sh.current_direction == Direction.DOWN
-            and sh.before_direction == Direction.UP
-        ):
-            sh.current_direction = Direction.UP
+        if sh.current_direction == Direction.RIGHT:
+            sh.before_direction = Direction.RIGHT
+            new_head_position = (
+                sh.snake_head_position[0] + 1,
+                sh.snake_head_position[1],
+            )
+        elif sh.current_direction == Direction.LEFT:
+            sh.before_direction = Direction.LEFT
+            new_head_position = (
+                sh.snake_head_position[0] - 1,
+                sh.snake_head_position[1],
+            )
+        elif sh.current_direction == Direction.UP:
+            sh.before_direction = Direction.UP
+            new_head_position = (
+                sh.snake_head_position[0],
+                sh.snake_head_position[1] - 1,
+            )
+        elif sh.current_direction == Direction.DOWN:
+            sh.before_direction = Direction.DOWN
+            new_head_position = (
+                sh.snake_head_position[0],
+                sh.snake_head_position[1] + 1,
+            )
 
         if new_head_position[0] < 0:
             new_head_position = (sh.max_position[0] - 1, new_head_position[1])
@@ -218,6 +222,10 @@ def snake_logic(
         for snake in sh.snack_render.sprites():
             if new_head_position != snake.pos:
                 Snak(sh.snake_head_position, [sh.snack_render, sh.all])
+
+        # create a new snake head and add it to the sprite groups
+        Snake(new_head_position, [sh.snake_render, sh.all])
+        sh.snake_head_position = new_head_position
 
         # draw the scene
         dirty = sh.all.draw(cur_screen)
