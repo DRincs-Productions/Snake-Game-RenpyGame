@@ -174,7 +174,7 @@ def snake_first_step(width: int, height: int, st: float, at: float) -> pygame.Su
     Snak.image = pygame.image.load("snak.webp").convert(st, at)
 
     Snake(sh.snake_head_position, [sh.snake_render, sh.all])
-    Snak((0, 0), [sh.snack_render, sh.all], sh.point)
+    Snak(sh.snack_position, [sh.snack_render, sh.all], sh.point)
 
     return screen
 
