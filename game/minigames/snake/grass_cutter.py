@@ -221,7 +221,7 @@ def snake_logic(
         # check if the new position is equal a position of the snake
         for snake in sh.snack_render.sprites():
             if new_head_position != snake.pos:
-                Snak(sh.snake_head_position, [sh.snack_render, sh.all])
+                Snak(new_head_position, [sh.snack_render, sh.all])
 
         # create a new snake head and add it to the sprite groups
         Snake(new_head_position, [sh.snake_render, sh.all])
