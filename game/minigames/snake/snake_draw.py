@@ -165,7 +165,7 @@ class SnakeSharedData:
 sh = SnakeSharedData()
 
 
-def main():
+def main() -> int:
     # # Initialize a shared data
     global sh
 
@@ -178,6 +178,7 @@ def main():
         delay=0.7,
     )
     minigame.show(show_and_start=True)
+    return 0
 
 
 def snake_first_step(width: int, height: int, st: float, at: float) -> pygame.Surface:

@@ -16,6 +16,7 @@ MARGIN = 4
 
 class Snake(pygame.sprite.Sprite):
     image: Surface
+    pos: tuple[int, int]
 
     def __init__(
         self,
@@ -35,6 +36,7 @@ class Snake(pygame.sprite.Sprite):
         self.life = life
         self.rect.left = pos[0] * (sh.x_rectangle + MARGIN)
         self.rect.top = pos[1] * (sh.x_rectangle + MARGIN)
+        self.pos = pos
 
     def update(self):
         self.life -= 1
@@ -112,7 +114,7 @@ class SnakeSharedData:
 sh = SnakeSharedData()
 
 
-def main():
+def main() -> int:
     # # Initialize a shared data
     global sh
 
@@ -126,6 +128,8 @@ def main():
         delay=0.3,
     )
     minigame.show(show_and_start=True)
+
+    return sh.point
 
 
 def draw_background(
@@ -255,11 +259,10 @@ def snake_logic(
         elif new_head_position[1] > sh.max_position[1] - 1:
             new_head_position = (new_head_position[0], 0)
 
-        # # check if the new position is equal a position of the snake
-        # for snake in sh.snake:
-        #     if snake.rect.midbottom == new_head_position:
-        #         sh.flag = False
-        #         break
+        # check if the new position is equal a position of the snake
+        for snake in sh.snake_render.sprites():
+            if new_head_position == snake.pos:
+                sh.is_alive = False
 
         # create a new snake head and add it to the sprite groups
         Snake(new_head_position, [sh.snake_render, sh.all], life=sh.point)
