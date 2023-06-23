@@ -79,16 +79,16 @@ class Direction(Enum):
 
 class SnakeSharedData:
     def __init__(self):
-        self.flag = True
-        self.move: Direction = Direction.RIGHT
-        self.before_move: Direction = self.move
+        self.is_alive = True
+        self.current_direction: Direction = Direction.RIGHT
+        self.before_direction: Direction = self.current_direction
         self.snake_head_position: tuple[int, int] = 0, 0
         self.max_position: tuple[int, int] = 0, 0
         self.snack_position: tuple[int, int] = 0, 0
         self.snake_render = pygame.sprite.Group()
         self.snack_render = pygame.sprite.GroupSingle()
         self.all = pygame.sprite.RenderUpdates()
-        self.point = 1
+        self.point = 0
         self.x_rectangle = 0
         self.y_rectangle = 0
 
@@ -169,13 +169,12 @@ def snake_first_step(width: int, height: int, st: float, at: float) -> pygame.Su
     start_y = random.randrange(0, sh.max_position[1])
     sh.snake_head_position = (start_x, start_y)
 
-    set_new_snack_position()
-
     Snake.image = pygame.image.load("snake.webp").convert(st, at)
     Snak.image = pygame.image.load("snak.webp").convert(st, at)
 
     Snake(sh.snake_head_position, [sh.snake_render, sh.all])
-    Snak(sh.snack_position, [sh.snack_render, sh.all], sh.point)
+
+    sh.point = 0
 
     return screen
 
@@ -186,7 +185,12 @@ def snake_logic(
     next_frame_time: Optional[float],
     current_frame_number: int,
 ) -> Optional[float]:
-    if sh.flag:
+    if sh.point == 0:
+        sh.point = 1
+        set_new_snack_position()
+        Snak(sh.snack_position, [sh.snack_render, sh.all], sh.point)
+
+    if sh.is_alive:
         # clear/erase the last drawn sprites
         sh.all.clear(cur_screen, sh.background)
 
@@ -196,35 +200,47 @@ def snake_logic(
         # determines the new position of the head
         new_head_position = (0, 0)
 
-        if sh.move == Direction.RIGHT and sh.before_move == Direction.LEFT:
-            sh.move = Direction.LEFT
-        elif sh.move == Direction.LEFT and sh.before_move == Direction.RIGHT:
-            sh.move = Direction.RIGHT
-        elif sh.move == Direction.UP and sh.before_move == Direction.DOWN:
-            sh.move = Direction.DOWN
-        elif sh.move == Direction.DOWN and sh.before_move == Direction.UP:
-            sh.move = Direction.UP
+        if (
+            sh.current_direction == Direction.RIGHT
+            and sh.before_direction == Direction.LEFT
+        ):
+            sh.current_direction = Direction.LEFT
+        elif (
+            sh.current_direction == Direction.LEFT
+            and sh.before_direction == Direction.RIGHT
+        ):
+            sh.current_direction = Direction.RIGHT
+        elif (
+            sh.current_direction == Direction.UP
+            and sh.before_direction == Direction.DOWN
+        ):
+            sh.current_direction = Direction.DOWN
+        elif (
+            sh.current_direction == Direction.DOWN
+            and sh.before_direction == Direction.UP
+        ):
+            sh.current_direction = Direction.UP
 
-        if sh.move == Direction.RIGHT:
-            sh.before_move = Direction.RIGHT
+        if sh.current_direction == Direction.RIGHT:
+            sh.before_direction = Direction.RIGHT
             new_head_position = (
                 sh.snake_head_position[0] + 1,
                 sh.snake_head_position[1],
             )
-        elif sh.move == Direction.LEFT:
-            sh.before_move = Direction.LEFT
+        elif sh.current_direction == Direction.LEFT:
+            sh.before_direction = Direction.LEFT
             new_head_position = (
                 sh.snake_head_position[0] - 1,
                 sh.snake_head_position[1],
             )
-        elif sh.move == Direction.UP:
-            sh.before_move = Direction.UP
+        elif sh.current_direction == Direction.UP:
+            sh.before_direction = Direction.UP
             new_head_position = (
                 sh.snake_head_position[0],
                 sh.snake_head_position[1] - 1,
             )
-        elif sh.move == Direction.DOWN:
-            sh.before_move = Direction.DOWN
+        elif sh.current_direction == Direction.DOWN:
+            sh.before_direction = Direction.DOWN
             new_head_position = (
                 sh.snake_head_position[0],
                 sh.snake_head_position[1] + 1,
@@ -250,7 +266,6 @@ def snake_logic(
         sh.snake_head_position = new_head_position
 
         # check if the new position is equal to the snack position
-        print(sh.snake_head_position, sh.snack_position)
         if sh.snake_head_position == sh.snack_position:
             sh.point += 1
             set_new_snack_position()
@@ -267,11 +282,11 @@ def snake_logic(
 
 def game_event(ev: EventType, x: int, y: int, st: float):
     if ev.type == pygame.KEYDOWN and ev.key == pygame.K_RIGHT:
-        sh.move = Direction.RIGHT
+        sh.current_direction = Direction.RIGHT
     elif ev.type == pygame.KEYDOWN and ev.key == pygame.K_LEFT:
-        sh.move = Direction.LEFT
+        sh.current_direction = Direction.LEFT
     elif ev.type == pygame.KEYDOWN and ev.key == pygame.K_UP:
-        sh.move = Direction.UP
+        sh.current_direction = Direction.UP
     elif ev.type == pygame.KEYDOWN and ev.key == pygame.K_DOWN:
-        sh.move = Direction.DOWN
+        sh.current_direction = Direction.DOWN
     return
