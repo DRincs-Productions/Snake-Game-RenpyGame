@@ -14,7 +14,7 @@ GAME_SCREEN_SIZE = Rect(0, 0, 640, 480)
 MARGIN = 4
 
 
-class Snake(pygame.sprite.Sprite):
+class Lawnmower(pygame.sprite.Sprite):
     image: Surface
     pos: tuple[int, int]
 
@@ -43,7 +43,7 @@ class Snake(pygame.sprite.Sprite):
             self.kill()
 
 
-class Snak(pygame.sprite.Sprite):
+class Earth(pygame.sprite.Sprite):
     image: Surface
 
     def __init__(
@@ -95,12 +95,12 @@ class SnakeSharedData:
         self._background = value
 
     @property
-    def snack(self) -> Snak:
-        return self._snack
+    def grass(self) -> Earth:
+        return self._grass
 
-    @snack.setter
-    def snack(self, value: Snak):
-        self._snack = value
+    @grass.setter
+    def grass(self, value: Earth):
+        self._grass = value
 
 
 sh = SnakeSharedData()
@@ -158,10 +158,10 @@ def snake_first_step(width: int, height: int, st: float, at: float) -> pygame.Su
     start_y = random.randrange(0, sh.max_position[1])
     sh.snake_head_position = (start_x, start_y)
 
-    Snake.image = pygame.image.load("snake.webp").convert(st, at)
-    Snak.image = pygame.image.load("snak.webp").convert(st, at)
+    Lawnmower.image = pygame.image.load("snake.webp").convert(st, at)
+    Earth.image = pygame.image.load("snak.webp").convert(st, at)
 
-    Snake(sh.snake_head_position, [sh.snake_render, sh.all])
+    Lawnmower(sh.snake_head_position, [sh.snake_render, sh.all])
 
     sh.point = 0
 
@@ -221,10 +221,10 @@ def snake_logic(
         # check if the new position is equal a position of the snake
         for snake in sh.snack_render.sprites():
             if new_head_position != snake.pos:
-                Snak(new_head_position, [sh.snack_render, sh.all])
+                Earth(new_head_position, [sh.snack_render, sh.all])
 
         # create a new snake head and add it to the sprite groups
-        Snake(new_head_position, [sh.snake_render, sh.all])
+        Lawnmower(new_head_position, [sh.snake_render, sh.all])
         sh.snake_head_position = new_head_position
 
         # draw the scene
