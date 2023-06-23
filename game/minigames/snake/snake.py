@@ -1,3 +1,4 @@
+from enum import Enum
 import random
 from typing import Optional, Union
 import pythonpackages.renpygame as pygame
@@ -69,11 +70,18 @@ class Snak(pygame.sprite.Sprite):
         return
 
 
+class Direction(Enum):
+    RIGHT = 0
+    LEFT = 1
+    UP = 2
+    DOWN = 3
+
+
 class SnakeSharedData:
     def __init__(self):
         self.flag = True
-        self.move = 0  # 0 right, 1 left, 2 up, 3 down
-        self.before_move = self.move
+        self.move: Direction = Direction.RIGHT
+        self.before_move: Direction = self.move
         self.snake_head_position: tuple[int, int] = 0, 0
         self.max_position: tuple[int, int] = 0, 0
         self.snack_position: tuple[int, int] = 0, 0
@@ -121,7 +129,7 @@ def main():
     minigame.show(show_and_start=True)
 
 
-def redrawWindow(
+def draw_background(
     margin: int, screen: pygame.Surface, st: float, at: float
 ) -> tuple[int, int]:
     # create the background, tile the bgd image
@@ -152,16 +160,10 @@ def set_new_snack_position():
 
 
 def snake_first_step(width: int, height: int, st: float, at: float) -> pygame.Surface:
-    # Set the display mode
-    if store._preferences.fullscreen:
-        winstyle = FULLSCREEN
-    else:
-        winstyle = 0
+    bestdepth = pygame.display.mode_ok((0, 0), 0, 32)
+    screen = pygame.display.set_mode((0, 0), 0, bestdepth)
 
-    bestdepth = pygame.display.mode_ok((0, 0), winstyle, 32)
-    screen = pygame.display.set_mode((0, 0), winstyle, bestdepth)
-
-    sh.max_position = redrawWindow(sh.margin, screen, st, at)
+    sh.max_position = draw_background(sh.margin, screen, st, at)
 
     # random starting positions, max is sh.max_position
     start_x = random.randrange(0, sh.max_position[0])
@@ -195,35 +197,35 @@ def snake_logic(
         # determines the new position of the head
         new_head_position = (0, 0)
 
-        if sh.move == 0 and sh.before_move == 1:
-            sh.move = 1
-        elif sh.move == 1 and sh.before_move == 0:
-            sh.move = 0
-        elif sh.move == 2 and sh.before_move == 3:
-            sh.move = 3
-        elif sh.move == 3 and sh.before_move == 2:
-            sh.move = 2
+        if sh.move == Direction.RIGHT and sh.before_move == Direction.LEFT:
+            sh.move = Direction.LEFT
+        elif sh.move == Direction.LEFT and sh.before_move == Direction.RIGHT:
+            sh.move = Direction.RIGHT
+        elif sh.move == Direction.UP and sh.before_move == Direction.DOWN:
+            sh.move = Direction.DOWN
+        elif sh.move == Direction.DOWN and sh.before_move == Direction.UP:
+            sh.move = Direction.UP
 
-        if sh.move == 0:  # right
-            sh.before_move = 0
+        if sh.move == Direction.RIGHT:
+            sh.before_move = Direction.RIGHT
             new_head_position = (
                 sh.snake_head_position[0] + 1,
                 sh.snake_head_position[1],
             )
-        elif sh.move == 1:  # left
-            sh.before_move = 1
+        elif sh.move == Direction.LEFT:
+            sh.before_move = Direction.LEFT
             new_head_position = (
                 sh.snake_head_position[0] - 1,
                 sh.snake_head_position[1],
             )
-        elif sh.move == 2:  # up
-            sh.before_move = 2
+        elif sh.move == Direction.UP:
+            sh.before_move = Direction.UP
             new_head_position = (
                 sh.snake_head_position[0],
                 sh.snake_head_position[1] - 1,
             )
-        elif sh.move == 3:  # down
-            sh.before_move = 3
+        elif sh.move == Direction.DOWN:
+            sh.before_move = Direction.DOWN
             new_head_position = (
                 sh.snake_head_position[0],
                 sh.snake_head_position[1] + 1,
@@ -244,6 +246,7 @@ def snake_logic(
         #         sh.flag = False
         #         break
 
+        # create a new snake head and add it to the sprite groups
         Snake(new_head_position, [sh.snake_render, sh.all], life=sh.point)
         sh.snake_head_position = new_head_position
 
@@ -265,11 +268,11 @@ def snake_logic(
 
 def game_event(ev: EventType, x: int, y: int, st: float):
     if ev.type == pygame.KEYDOWN and ev.key == pygame.K_RIGHT:
-        sh.move = 0
+        sh.move = Direction.RIGHT
     elif ev.type == pygame.KEYDOWN and ev.key == pygame.K_LEFT:
-        sh.move = 1
+        sh.move = Direction.LEFT
     elif ev.type == pygame.KEYDOWN and ev.key == pygame.K_UP:
-        sh.move = 2
+        sh.move = Direction.UP
     elif ev.type == pygame.KEYDOWN and ev.key == pygame.K_DOWN:
-        sh.move = 3
+        sh.move = Direction.DOWN
     return
