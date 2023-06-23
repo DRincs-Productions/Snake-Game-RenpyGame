@@ -55,14 +55,17 @@ class Snak(pygame.sprite.Sprite):
                 pygame.sprite.GroupSingle,
             ]
         ],
+        life: int = 1,
     ):
-        # TODO: pos * size of the rectangle
         pygame.sprite.Sprite.__init__(self, containers)
         self.rect = self.image.get_rect()
         self.rect.left = pos[0] * (sh.x_rectangle + sh.margin)
         self.rect.top = pos[1] * (sh.x_rectangle + sh.margin)
+        self.life = life
 
     def update(self):
+        if self.life != sh.point:
+            self.kill()
         return
 
 
@@ -109,11 +112,11 @@ def main():
     if not sh:
         sh = SnakeSharedData()
 
-    minigame = pygame.RenpyGameByTimer(
+    minigame = pygame.RenpyGameByLoop(
         first_step=snake_first_step,
         update_process=snake_logic,
         event_lambda=game_event,
-        delay=0.5,
+        delay=0.3,
     )
     minigame.show(show_and_start=True)
 
@@ -171,7 +174,7 @@ def snake_first_step(width: int, height: int, st: float, at: float) -> pygame.Su
     Snak.image = pygame.image.load("snak.webp").convert(st, at)
 
     Snake(sh.snake_head_position, [sh.snake_render, sh.all])
-    sh.snack = Snak((0, 0), [sh.snack_render, sh.all])
+    Snak((0, 0), [sh.snack_render, sh.all], sh.point)
 
     return screen
 
@@ -245,11 +248,11 @@ def snake_logic(
         sh.snake_head_position = new_head_position
 
         # check if the new position is equal to the snack position
+        print(sh.snake_head_position, sh.snack_position)
         if sh.snake_head_position == sh.snack_position:
             sh.point += 1
             set_new_snack_position()
-            sh.snack.kill()
-            sh.snack = Snak(sh.snack_position, [sh.snack_render, sh.all])
+            Snak(sh.snack_position, [sh.snack_render, sh.all], sh.point)
 
         # draw the scene
         dirty = sh.all.draw(cur_screen)
