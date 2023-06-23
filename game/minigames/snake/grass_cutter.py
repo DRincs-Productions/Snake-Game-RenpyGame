@@ -62,7 +62,7 @@ class Snak(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.rect.left = pos[0] * (sh.x_rectangle + MARGIN)
         self.rect.top = pos[1] * (sh.x_rectangle + MARGIN)
-        self.life = life
+        self.pos = pos
 
 
 class Direction(Enum):
@@ -79,7 +79,6 @@ class SnakeSharedData:
         self.before_direction: Direction = self.current_direction
         self.snake_head_position: tuple[int, int] = 0, 0
         self.max_position: tuple[int, int] = 0, 0
-        self.snack_position: tuple[int, int] = 0, 0
         self.snake_render = pygame.sprite.Group()
         self.snack_render = pygame.sprite.GroupSingle()
         self.all = pygame.sprite.RenderUpdates()
@@ -148,13 +147,6 @@ def draw_background(
     return max_x, max_y
 
 
-def set_new_snack_position():
-    """Set a new snack position"""
-    snack_x = random.randrange(0, sh.max_position[0])
-    snack_y = random.randrange(0, sh.max_position[1])
-    sh.snack_position = (snack_x, snack_y)
-
-
 def snake_first_step(width: int, height: int, st: float, at: float) -> pygame.Surface:
     bestdepth = pygame.display.mode_ok((0, 0), 0, 32)
     screen = pygame.display.set_mode((0, 0), 0, bestdepth)
@@ -182,11 +174,6 @@ def snake_logic(
     next_frame_time: Optional[float],
     current_frame_number: int,
 ) -> Optional[float]:
-    if sh.point == 0:
-        sh.point = 1
-        set_new_snack_position()
-        Snak(sh.snack_position, [sh.snack_render, sh.all])
-
     if sh.is_alive:
         # clear/erase the last drawn sprites
         sh.all.clear(cur_screen, sh.background)
