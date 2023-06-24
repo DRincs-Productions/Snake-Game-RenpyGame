@@ -72,13 +72,11 @@ class Direction(Enum):
 
 class SnakeSharedData:
     def __init__(self):
-        self.is_alive = True
         self.current_direction: Direction = Direction.RIGHT
         self.before_direction: Direction = self.current_direction
         self.snake_head_position: tuple[int, int] = 0, 0
         self.max_position: tuple[int, int] = 0, 0
-        self.snake_render = pygame.sprite.Group()
-        self.snack_render = pygame.sprite.GroupSingle()
+        self.grass_list = pygame.sprite.GroupSingle()
         self.all = pygame.sprite.RenderUpdates()
         self.point = 0
         self.x_rectangle = 0
@@ -163,7 +161,7 @@ def snake_first_step(width: int, height: int, st: float, at: float) -> pygame.Su
     Lawnmower.image = pygame.image.load("lawnmower.webp").convert(st, at)
     Ground.image = pygame.image.load("ground.webp").convert(st, at)
 
-    Lawnmower(sh.snake_head_position, [sh.snake_render, sh.all])
+    Lawnmower(sh.snake_head_position, [sh.all])
 
     sh.point = 0
 
@@ -176,7 +174,7 @@ def snake_logic(
     next_frame_time: Optional[float],
     current_frame_number: int,
 ) -> Optional[float]:
-    if sh.is_alive:
+    if sh.point != (sh.max_position[0] * sh.max_position[1]) - 1:
         # clear/erase the last drawn sprites
         sh.all.clear(cur_screen, sh.background)
 
@@ -222,15 +220,16 @@ def snake_logic(
 
         # check if the new position is equal a position of the snake
         add_snack = True
-        for item in sh.snack_render.sprites():
-            if new_head_position == item.pos:
+        for item in sh.all.sprites():
+            print(sh.snake_head_position, item.pos)
+            if sh.snake_head_position == item.pos:
                 add_snack = False
         if add_snack:
-            Ground(new_head_position, [sh.snack_render, sh.all])
+            Ground(sh.snake_head_position, [sh.grass_list, sh.all])
             sh.point += 1
 
         # create a new snake head and add it to the sprite groups
-        Lawnmower(new_head_position, [sh.snake_render, sh.all])
+        Lawnmower(new_head_position, [sh.all])
         sh.snake_head_position = new_head_position
 
         # draw the scene
