@@ -11,6 +11,9 @@ git submodule update --remote
 
 ----
 
+This game uses: [Renpygame](https://github.com/DRincs-Productions/Renpygame)
+
+
 # Snake
 ![ezgif com-video-to-gif](https://github.com/DRincs-Productions/Snake-Game-RenpyGame/assets/67595890/9423ed0d-8204-4184-b635-be0ddc7aa47e)
 
