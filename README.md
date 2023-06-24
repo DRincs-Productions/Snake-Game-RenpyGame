@@ -11,21 +11,8 @@ git submodule update --remote
 
 ----
 
-# Snake-Game
+# Snake
+![ezgif com-video-to-gif](https://github.com/DRincs-Productions/Snake-Game-RenpyGame/assets/67595890/9423ed0d-8204-4184-b635-be0ddc7aa47e)
 
-The classic snake game. Made with pygame.
-
-You can check out my video tutorial series on how to create this game: <https://www.youtube.com/watch?v=5tvER0MT14s&t=2s>
-
-# Requirements
-
-- Python 3.x
-- pygame
-
-# Run in Gitpod
-
-You can also run Snake-Game in Gitpod, a free online dev environment for GitHub:
-
-If you're intersted in a paid subscription with GitPod use the coupon code: **TECHWITHTIM19**
-
-[![Open in Gitpod](https://gitpod.io/button/open-in-gitpod.svg)](https://gitpod.io/#https://github.com/techwithtim/Snake-Game/blob/master/snake.py)
+# Grass Cutter
+![ezgif com-video-to-gif (1)](https://github.com/DRincs-Productions/Snake-Game-RenpyGame/assets/67595890/d2afb253-61d0-4fd9-bf20-0268f94e927b)
