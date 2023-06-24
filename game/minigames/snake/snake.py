@@ -1,17 +1,15 @@
-from enum import Enum
 import random
+from enum import Enum
 from typing import Optional, Union
+
+import renpy.exports as renpy
+
 import pythonpackages.renpygame as pygame
-
-import renpy.exports as renpy
 from pythonpackages.renpygame.display import Surface
-
 from pythonpackages.renpygame.event import EventType
-from pythonpackages.renpygame.rect import Rect
-import renpy.exports as renpy
 
-GAME_SCREEN_SIZE = Rect(0, 0, 640, 480)
-MARGIN = 4
+game_screen_size: tuple[int, int] = (0, 0)
+game_margin = 0
 
 
 class Snake(pygame.sprite.Sprite):
@@ -34,8 +32,8 @@ class Snake(pygame.sprite.Sprite):
         pygame.sprite.Sprite.__init__(self, containers)
         self.rect = self.image.get_rect()
         self.life = life
-        self.rect.left = pos[0] * (sh.x_rectangle + MARGIN)
-        self.rect.top = pos[1] * (sh.x_rectangle + MARGIN)
+        self.rect.left = pos[0] * (sh.x_rectangle + game_margin)
+        self.rect.top = pos[1] * (sh.x_rectangle + game_margin)
         self.pos = pos
 
     def update(self):
@@ -62,8 +60,8 @@ class Snak(pygame.sprite.Sprite):
     ):
         pygame.sprite.Sprite.__init__(self, containers)
         self.rect = self.image.get_rect()
-        self.rect.left = pos[0] * (sh.x_rectangle + MARGIN)
-        self.rect.top = pos[1] * (sh.x_rectangle + MARGIN)
+        self.rect.left = pos[0] * (sh.x_rectangle + game_margin)
+        self.rect.top = pos[1] * (sh.x_rectangle + game_margin)
         self.life = life
 
     def update(self):
@@ -114,7 +112,11 @@ class SnakeSharedData:
 sh = SnakeSharedData()
 
 
-def main() -> int:
+def main(size: tuple[int, int], margin=0) -> int:
+    global game_screen_size
+    game_screen_size = size
+    global game_margin
+    game_margin = margin
     # # Initialize a shared data
     global sh
 
@@ -138,8 +140,8 @@ def draw_background(
     # create the background, tile the bgd image
     rectangle = pygame.image.load("rectangle.webp").convert(st, at)
     sh.x_rectangle, sh.y_rectangle = rectangle.get_size()
-    sh.background = pygame.Surface(GAME_SCREEN_SIZE.size)
-    x_background, y_background = GAME_SCREEN_SIZE.size
+    sh.background = pygame.Surface(game_screen_size)
+    x_background, y_background = game_screen_size
     max_x = int(x_background // (sh.x_rectangle + margin))
     max_y = int(y_background // (sh.y_rectangle + margin))
     for x in range(max_x):
@@ -166,7 +168,7 @@ def snake_first_step(width: int, height: int, st: float, at: float) -> pygame.Su
     bestdepth = pygame.display.mode_ok((0, 0), 0, 32)
     screen = pygame.display.set_mode((0, 0), 0, bestdepth)
 
-    sh.max_position = draw_background(MARGIN, screen, st, at)
+    sh.max_position = draw_background(game_margin, screen, st, at)
 
     # random starting positions, max is sh.max_position
     start_x = random.randrange(0, sh.max_position[0])

@@ -12,9 +12,9 @@ label play_snake:
 label aliens_retry:
     menu:
         "Snake":
-            $ score = snake.main()
+            $ score = snake.main((1920, 1080), 4)
         "Grass Cutter":
-            $ score = grass_cutter.main()
+            $ score = grass_cutter.main((1920, 1080), 4)
         "Snake Draw (Test)":
             $ score = snake_draw.main()
 
